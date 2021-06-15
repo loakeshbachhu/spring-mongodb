@@ -1,5 +1,9 @@
 package com.demo.spring.mongo.api.resource;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +44,29 @@ public class BookController {
 	public String deletBook(@PathVariable int id) {
 		repository.deleteById(id);
 		return "Book deleted with Id : " + id;
+	}
+	
+	@GetMapping("/uploadBooks")
+	public String uploadBooks() {
+		String record = "";
+			BufferedReader bufferedReader = null;
+			try {
+				bufferedReader = new BufferedReader(new FileReader("src/main/resources/Books.csv"));
+				while((record = bufferedReader.readLine()) != null) {
+					String[] data = record.split(",");
+					var book = new Book();
+					book.setId(Integer.valueOf(data[0]));
+					book.setBookName(data[1]);
+					book.setAuthorName(data[2]);
+					repository.save(book);
+				}
+				bufferedReader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return "Books Upload failed. something went wrong.."+ e.getMessage();
+			}
+			
+			return "All Books are Uploaded..";
 	}
 
 }
